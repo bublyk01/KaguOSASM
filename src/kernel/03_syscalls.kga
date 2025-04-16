@@ -1,0 +1,336 @@
+// System call table:
+// Call Number  |       Name        |         REG_A      |        REG_B      |        REG_C    |         REG_RES       |      REG_ERROR
+//      0       |  exit             |      exit code     |        -          |        -        |            -          |         -
+//      1       |  println          |        text        |    color code     |        -        |            -          |         -
+//      2       |  print            |        text        |    color code     |        -        |            -          |         -
+//      3       |  read_input       |    keyboard mode   |        -          |        -        |     input string      |         -
+//      4       |  open             |     file path      |        -          |        -        |   file descriptor     |     error
+//      5       |  descriptor_info  |  file descriptor   |        -          |        -        |      file info        |     error
+//      6       |  close            |  file descriptor   |        -          |        -        |            -          |     error
+//      7       |  read             |  file descriptor   |   line number     |        -        |     read line         |  EOF / error
+//      8       |  write            |  file descriptor   |   line number     |   new value     |            -          |     error
+//      9       |  set_background   |  background color  |        -          |        -        |            -          |         -
+//     10       |  render_bitmap    |  start address     |    end address    |        -        |            -          |         -
+//     11       |  sleep            |  sleep in seconds  |        -          |        -        |            -          |         -
+//     12       |  get_file_attr    |  file descriptor   |        -          |        -        |  "7 7 7 user group"   |     error
+//     13       |  set_file_attr    |  file descriptor   |  "4 4 0 user grp" |        -        |            -          |     error
+//     14       |  sched_program    |  command line      |    priority       |        -        |  process ID           |     error
+//     15       | is_process_active |   pid to check     |                   |                 |  process info         |  error if not active
+//     16       |   kill_process    |   pid to kill      |         -         |         -       |         -             |  error if no process
+//     17       |    skip_sched     |         -          |         -         |         -       |         -             |  error if skip failed
+//     18       |    wait_sched     |         -          |         -         |         -       |         -             |  error if wait failed
+
+var sys_call_count
+var sys_call_00
+var sys_call_01
+var sys_call_02
+var sys_call_03
+var sys_call_04
+var sys_call_05
+var sys_call_06
+var sys_call_07
+var sys_call_08
+var sys_call_09
+var sys_call_10
+var sys_call_11
+var sys_call_12
+var sys_call_13
+var sys_call_14
+var sys_call_15
+var sys_call_16
+var sys_call_17
+var sys_call_18
+
+
+label sys_call_handler
+    var sys_call_arg1
+    var sys_call_arg2
+    var sys_call_arg3
+    var sys_call_number
+    copy REG_A to var:sys_call_arg1
+    copy REG_B to var:sys_call_arg2
+    copy REG_C to var:sys_call_arg3
+    copy REG_D to var:sys_call_number
+
+    // sys_call_number should be a number
+    copy var:sys_call_number to REG_A
+    write OP_IS_NUM to REG_OP
+    cpu_exec
+    jump_if_not label:unknown_sys_call
+
+    // sys_call_number should be >= 0
+    // copy var:sys_call_number to REG_A  <= it's already there
+    write 0 to REG_B
+    write OP_CMP_LT to REG_OP
+    cpu_exec
+    jump_if label:unknown_sys_call
+
+    // sys_call_number should be < sys_call_count
+    // copy var:sys_call_number to REG_A  <= it's already there
+    copy var:sys_call_count to REG_B
+    // write OP_CMP_LT to REG_OP         <= it's already there
+    cpu_exec
+    jump_if_not label:unknown_sys_call
+
+    // If sys call number is valid then we should find handler in syscall table
+    // We should get the address of handler for call 0 and add offset to it for further jump
+    copy @var:sys_call_00 to REG_A
+    copy var:sys_call_number to REG_B
+    write OP_ADD to REG_OP
+    cpu_exec
+
+    var some_result
+    copy *REG_RES to var:some_result
+    jump *var:some_result
+
+label unknown_sys_call
+    write "Unknown system call!!!" to DISPLAY_BUFFER
+    write COLOR_RED to DISPLAY_COLOR
+    write OP_DISPLAY_LN to REG_OP
+    cpu_exec
+
+    write 38 to REG_A // ENOSYS exit code for missing system function implementation
+    write "Function not implemented" to REG_ERROR
+    write "" to REG_RES
+    jump label:sys_call_exit
+
+label sys_call_to_user_mode
+    write OP_SYS_RETURN to REG_OP
+    cpu_exec
+
+
+// SYSTEM CALLS IMPLEMENTATION START
+label sys_call_exit
+    // As this system call stops the process, we should adjust interrupt data to set ignore custom result registers
+    // This will ensure that the next running process will not be impacted by any results of this system call
+    // NOTE: interrupt data format <id> <program counter> <ignore result registers flag>
+    copy REG_SYS_INTERRUPT_DATA to REG_A
+    write 3 to REG_B
+    write " " to REG_C
+    write 1 to REG_D
+    write OP_REPLACE_COLUMN to REG_OP
+    cpu_exec
+    copy REG_RES to REG_SYS_INTERRUPT_DATA
+
+    copy PROGRAM_COUNTER to var:sys_return
+    jump label:sys_sched_process_stop
+
+
+label sys_call_println
+    copy var:sys_call_arg1 to DISPLAY_BUFFER
+    copy var:sys_call_arg2 to DISPLAY_COLOR
+    write OP_DISPLAY_LN to REG_OP
+    cpu_exec
+    jump label:sys_call_to_user_mode
+
+
+
+label sys_call_print
+    copy var:sys_call_arg1 to DISPLAY_BUFFER
+    copy var:sys_call_arg2 to DISPLAY_COLOR
+    write OP_DISPLAY to REG_OP
+    cpu_exec
+    jump label:sys_call_to_user_mode
+
+
+
+label sys_call_read_input
+    copy var:sys_call_arg1 to REG_A
+    write OP_READ_INPUT to REG_OP
+    cpu_exec
+    copy KEYBOARD_BUFFER to REG_RES
+    jump label:sys_call_to_user_mode
+
+
+
+label sys_call_fs_open
+    copy var:sys_call_arg1 to REG_A
+    copy PROGRAM_COUNTER to var:sys_return
+    jump label:sys_fs_open
+    jump_err label:sys_call_to_user_mode
+
+    var sys_call_fs_open_fd
+    copy REG_RES to var:sys_call_fs_open_fd
+
+    // Add newly alocated file descriptor to fd list of active process 
+    copy var:sys_call_fs_open_fd to REG_A
+    copy PROGRAM_COUNTER to var:sys_return
+    jump label:sys_sched_process_add_fd
+
+    copy var:sys_call_fs_open_fd to REG_RES
+    jump label:sys_call_to_user_mode
+
+
+
+label sys_call_fs_descriptor_info
+    copy var:sys_call_arg1 to REG_A
+    copy PROGRAM_COUNTER to var:sys_return
+    jump label:sys_fs_descriptor_info
+    jump label:sys_call_to_user_mode
+
+
+
+label sys_call_fs_close
+    copy var:sys_call_arg1 to REG_A
+    copy PROGRAM_COUNTER to var:sys_return
+    jump label:sys_fs_close
+    jump_err label:sys_call_to_user_mode
+
+    var sys_call_fs_close_fd
+    copy REG_RES to var:sys_call_fs_close_fd
+
+    // Remove file descriptor from fd list of active process 
+    copy var:sys_call_fs_close_fd to REG_A
+    copy PROGRAM_COUNTER to var:sys_return
+    jump label:sys_sched_process_rm_fd
+
+    copy var:sys_call_fs_close_fd to REG_RES
+    jump label:sys_call_to_user_mode
+
+
+
+label sys_call_fs_read
+    copy var:sys_call_arg1 to REG_A
+    copy var:sys_call_arg2 to REG_B
+    copy PROGRAM_COUNTER to var:sys_return
+    jump label:sys_fs_read
+    jump label:sys_call_to_user_mode
+
+
+
+label sys_call_fs_write
+    copy var:sys_call_arg1 to REG_A
+    copy var:sys_call_arg2 to REG_B
+    copy var:sys_call_arg3 to REG_C
+    copy PROGRAM_COUNTER to var:sys_return
+    jump label:sys_fs_write
+    jump label:sys_call_to_user_mode
+
+
+
+label sys_call_set_background
+    copy var:sys_call_arg1 to DISPLAY_BACKGROUND
+    write OP_SET_BACKGROUND_COLOR to REG_OP
+    cpu_exec
+    jump label:sys_call_to_user_mode
+
+
+
+label sys_call_render_bitmap
+    // add offset of the process memory space to arguments:
+    copy var:sys_call_arg1 to REG_A
+    copy REG_PROC_START_ADDRESS to REG_B
+    write OP_ADD to REG_OP
+    cpu_exec
+    copy REG_RES to var:sys_call_arg1
+
+    copy var:sys_call_arg2 to REG_A
+    cpu_exec
+    copy REG_RES to var:sys_call_arg2
+
+    // Render bitmap:
+    copy var:sys_call_arg1 to REG_A
+    copy var:sys_call_arg2 to REG_B
+    write OP_RENDER_BITMAP to REG_OP
+    cpu_exec
+    jump label:sys_call_to_user_mode
+
+
+
+label sys_call_sleep
+    copy var:sys_call_arg1 to REG_A
+    write OP_NOP to REG_OP
+    cpu_exec
+    jump label:sys_call_to_user_mode
+
+
+
+label sys_call_get_file_attr
+    // var:sys_call_arg1 => fd
+    jump label:sys_call_to_user_mode
+
+
+
+label sys_call_set_file_attr
+    // var:sys_call_arg1 => fd
+    // var:sys_call_arg2 => new attr
+    jump label:sys_call_to_user_mode
+
+
+
+label sys_call_sched_program
+    copy var:sys_call_arg1 to REG_A
+    copy var:sys_call_arg2 to REG_B
+    copy PROGRAM_COUNTER to var:sys_return
+    jump label:sys_sched_process_load
+    jump label:sys_call_to_user_mode
+
+
+
+label sys_call_is_active_pid
+    copy var:sys_call_arg1 to REG_A
+    copy PROGRAM_COUNTER to var:sys_return
+    jump label:sys_sched_is_active_pid
+    jump label:sys_call_to_user_mode
+
+
+
+label sys_call_kill_process
+    copy var:sys_call_arg1 to REG_A
+    copy PROGRAM_COUNTER to var:sys_return
+    jump label:sys_sched_kill_pid
+    jump label:sys_call_to_user_mode
+
+
+
+
+label sys_call_skip_sched
+    copy PROGRAM_COUNTER to var:sys_return
+    jump label:sys_sched_skip_sched
+    jump label:sys_call_to_user_mode
+
+
+
+
+label sys_call_wait_sched
+    copy PROGRAM_COUNTER to var:sys_return
+    jump label:sys_sched_wait_sched
+    jump label:sys_call_to_user_mode
+
+
+// SYSTEM CALLS IMPLEMENTATION END
+
+
+// Use the following commands to init table with system calls and handler:
+//          copy PROGRAM_COUNTER to var:sys_return
+//          jump label:init_sys_call_table
+// RETURN:
+//      REG_ERROR contains error
+label sys_call_table_init
+    copy PROGRAM_COUNTER to var:sys_stack_return
+    jump label:sys_stack_push
+
+    write label:sys_call_handler to REG_SYS_CALL_HANDLER
+    write 19 to var:sys_call_count
+
+    write label:sys_call_exit to var:sys_call_00
+    write label:sys_call_println to var:sys_call_01
+    write label:sys_call_print to var:sys_call_02
+    write label:sys_call_read_input to var:sys_call_03
+    write label:sys_call_fs_open to var:sys_call_04
+    write label:sys_call_fs_descriptor_info to var:sys_call_05
+    write label:sys_call_fs_close to var:sys_call_06
+    write label:sys_call_fs_read to var:sys_call_07
+    write label:sys_call_fs_write to var:sys_call_08
+    write label:sys_call_set_background to var:sys_call_09
+    write label:sys_call_render_bitmap to var:sys_call_10
+    write label:sys_call_sleep to var:sys_call_11
+    write label:sys_call_get_file_attr to var:sys_call_12
+    write label:sys_call_set_file_attr to var:sys_call_13
+    write label:sys_call_sched_program to var:sys_call_14
+    write label:sys_call_is_active_pid to var:sys_call_15
+    write label:sys_call_kill_process to var:sys_call_16
+    write label:sys_call_skip_sched to var:sys_call_17
+    write label:sys_call_wait_sched to var:sys_call_18
+
+    jump label:sys_stack_pop
