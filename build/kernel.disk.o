@@ -1,0 +1,719 @@
+file tests/kagu_test.kga
+line 10
+_ cmd DEBUG_OFF
+line 20
+_ cmd write
+_ num 0
+_ kto =>
+_ var successCount
+line 21
+_ cmd write
+_ num 0
+_ kto =>
+_ var errorCount
+line 22
+_ cmd write
+_ num 0
+_ kto =>
+_ var totalCount
+line 24
+_ cmd jump
+_ lbl startTest
+line 28
+_ cmd copy
+_ var totalCount
+_ kto =>
+_ reg REG_A
+line 29
+_ cmd write
+_ opr OP_INCR
+_ kto =>
+_ reg REG_OP
+line 30
+_ cmd cpu_exec
+line 31
+_ cmd copy
+_ reg REG_RES
+_ kto =>
+_ var totalCount
+line 34
+_ cmd write
+_ str Test 
+_ kto =>
+_ reg DISPLAY_BUFFER
+line 35
+_ cmd write
+_ clr COLOR_NO
+_ kto =>
+_ reg DISPLAY_COLOR
+line 36
+_ cmd write
+_ opr OP_DISPLAY
+_ kto =>
+_ reg REG_OP
+line 37
+_ cmd cpu_exec
+line 38
+_ cmd copy
+_ var testName
+_ kto =>
+_ reg DISPLAY_BUFFER
+line 39
+_ cmd write
+_ clr COLOR_BLUE
+_ kto =>
+_ reg DISPLAY_COLOR
+line 40
+_ cmd cpu_exec
+line 41
+_ cmd write
+_ str :
+_ kto =>
+_ reg DISPLAY_BUFFER
+line 42
+_ cmd write
+_ clr COLOR_NO
+_ kto =>
+_ reg DISPLAY_COLOR
+line 43
+_ cmd write
+_ opr OP_DISPLAY_LN
+_ kto =>
+_ reg REG_OP
+line 44
+_ cmd cpu_exec
+line 47
+_ cmd copy
+_ var expected
+_ kto =>
+_ reg REG_A
+line 48
+_ cmd copy
+_ var actual
+_ kto =>
+_ reg REG_B
+line 49
+_ cmd write
+_ opr OP_CMP_EQ
+_ kto =>
+_ reg REG_OP
+line 50
+_ cmd cpu_exec
+line 51
+_ cmd jump_if
+_ lbl success
+line 52
+_ cmd jump
+_ lbl fail
+line 57
+_ cmd copy
+_ var errorCount
+_ kto =>
+_ reg REG_A
+line 58
+_ cmd write
+_ opr OP_INCR
+_ kto =>
+_ reg REG_OP
+line 59
+_ cmd cpu_exec
+line 60
+_ cmd copy
+_ reg REG_RES
+_ kto =>
+_ var errorCount
+line 63
+_ cmd write
+_ str Fail
+_ kto =>
+_ reg DISPLAY_BUFFER
+line 64
+_ cmd write
+_ clr COLOR_RED
+_ kto =>
+_ reg DISPLAY_COLOR
+line 65
+_ cmd write
+_ opr OP_DISPLAY_LN
+_ kto =>
+_ reg REG_OP
+line 66
+_ cmd cpu_exec
+line 67
+_ cmd jump
+_ lbl execNextTest
+line 72
+_ cmd copy
+_ var successCount
+_ kto =>
+_ reg REG_A
+line 73
+_ cmd write
+_ opr OP_INCR
+_ kto =>
+_ reg REG_OP
+line 74
+_ cmd cpu_exec
+line 75
+_ cmd copy
+_ reg REG_RES
+_ kto =>
+_ var successCount
+line 78
+_ cmd write
+_ str OK
+_ kto =>
+_ reg DISPLAY_BUFFER
+line 79
+_ cmd write
+_ clr COLOR_GREEN
+_ kto =>
+_ reg DISPLAY_COLOR
+line 80
+_ cmd write
+_ opr OP_DISPLAY_LN
+_ kto =>
+_ reg REG_OP
+line 81
+_ cmd cpu_exec
+line 82
+_ cmd jump
+_ lbl execNextTest
+line 86
+_ cmd copy
+_ var nextTestAddress
+_ kto =>
+_ reg REG_A
+line 87
+_ cmd write
+_ num 2
+_ kto =>
+_ reg REG_B
+line 88
+_ cmd write
+_ opr OP_ADD
+_ kto =>
+_ reg REG_OP
+line 89
+_ cmd cpu_exec
+line 90
+_ cmd jump
+* reg REG_RES
+line 95
+_ cmd write
+_ str Total tests: 
+_ kto =>
+_ reg DISPLAY_BUFFER
+line 96
+_ cmd write
+_ clr COLOR_NO
+_ kto =>
+_ reg DISPLAY_COLOR
+line 97
+_ cmd write
+_ opr OP_DISPLAY
+_ kto =>
+_ reg REG_OP
+line 98
+_ cmd cpu_exec
+line 99
+_ cmd copy
+_ var totalCount
+_ kto =>
+_ reg DISPLAY_BUFFER
+line 100
+_ cmd write
+_ opr OP_DISPLAY_LN
+_ kto =>
+_ reg REG_OP
+line 101
+_ cmd cpu_exec
+line 104
+_ cmd write
+_ str Successful tests: 
+_ kto =>
+_ reg DISPLAY_BUFFER
+line 105
+_ cmd write
+_ clr COLOR_GREEN
+_ kto =>
+_ reg DISPLAY_COLOR
+line 106
+_ cmd write
+_ opr OP_DISPLAY
+_ kto =>
+_ reg REG_OP
+line 107
+_ cmd cpu_exec
+line 108
+_ cmd copy
+_ var successCount
+_ kto =>
+_ reg DISPLAY_BUFFER
+line 109
+_ cmd write
+_ opr OP_DISPLAY_LN
+_ kto =>
+_ reg REG_OP
+line 110
+_ cmd cpu_exec
+line 113
+_ cmd copy
+_ var errorCount
+_ kto =>
+_ reg REG_A
+line 114
+_ cmd write
+_ num 0
+_ kto =>
+_ reg REG_B
+line 115
+_ cmd write
+_ opr OP_CMP_EQ
+_ kto =>
+_ reg REG_OP
+line 116
+_ cmd cpu_exec
+line 117
+_ cmd jump_if
+_ lbl halt
+line 118
+_ cmd write
+_ str Failed tests: 
+_ kto =>
+_ reg DISPLAY_BUFFER
+line 119
+_ cmd write
+_ clr COLOR_RED
+_ kto =>
+_ reg DISPLAY_COLOR
+line 120
+_ cmd write
+_ opr OP_DISPLAY
+_ kto =>
+_ reg REG_OP
+line 121
+_ cmd cpu_exec
+line 122
+_ cmd copy
+_ var errorCount
+_ kto =>
+_ reg DISPLAY_BUFFER
+line 123
+_ cmd write
+_ opr OP_DISPLAY_LN
+_ kto =>
+_ reg REG_OP
+line 124
+_ cmd cpu_exec
+line 127
+_ cmd write
+_ opr OP_HALT
+_ kto =>
+_ reg REG_OP
+line 128
+_ cmd cpu_exec
+file tests/cpu/test_sub.kga
+line 4
+_ cmd write
+_ str 5 - 3 = 2
+_ kto =>
+_ var testName
+line 5
+_ cmd write
+_ str 5
+_ kto =>
+_ reg REG_A
+line 6
+_ cmd write
+_ str 3
+_ kto =>
+_ reg REG_B
+line 7
+_ cmd write
+_ opr OP_SUB
+_ kto =>
+_ reg REG_OP
+line 8
+_ cmd cpu_exec
+line 10
+_ cmd copy
+_ reg REG_RES
+_ kto =>
+_ var actual
+line 11
+_ cmd write
+_ str 2
+_ kto =>
+_ var expected
+line 13
+_ cmd copy
+_ reg PROGRAM_COUNTER
+_ kto =>
+_ var nextTestAddress
+line 14
+_ cmd jump
+_ lbl check
+line 17
+_ cmd write
+_ str 10 - 5 = 5
+_ kto =>
+_ var testName
+line 18
+_ cmd write
+_ str 10
+_ kto =>
+_ reg REG_A
+line 19
+_ cmd write
+_ str 5
+_ kto =>
+_ reg REG_B
+line 20
+_ cmd write
+_ opr OP_SUB
+_ kto =>
+_ reg REG_OP
+line 21
+_ cmd cpu_exec
+line 23
+_ cmd copy
+_ reg REG_RES
+_ kto =>
+_ var actual
+line 24
+_ cmd write
+_ str 5
+_ kto =>
+_ var expected
+line 26
+_ cmd copy
+_ reg PROGRAM_COUNTER
+_ kto =>
+_ var nextTestAddress
+line 27
+_ cmd jump
+_ lbl check
+line 30
+_ cmd write
+_ str 0 - 0 = 0
+_ kto =>
+_ var testName
+line 31
+_ cmd write
+_ str 0
+_ kto =>
+_ reg REG_A
+line 32
+_ cmd write
+_ str 0
+_ kto =>
+_ reg REG_B
+line 33
+_ cmd write
+_ opr OP_SUB
+_ kto =>
+_ reg REG_OP
+line 34
+_ cmd cpu_exec
+line 36
+_ cmd copy
+_ reg REG_RES
+_ kto =>
+_ var actual
+line 37
+_ cmd write
+_ str 0
+_ kto =>
+_ var expected
+line 39
+_ cmd copy
+_ reg PROGRAM_COUNTER
+_ kto =>
+_ var nextTestAddress
+line 40
+_ cmd jump
+_ lbl check
+line 43
+_ cmd write
+_ str 0 - 5 = -5
+_ kto =>
+_ var testName
+line 44
+_ cmd write
+_ str 0
+_ kto =>
+_ reg REG_A
+line 45
+_ cmd write
+_ str 5
+_ kto =>
+_ reg REG_B
+line 46
+_ cmd write
+_ opr OP_SUB
+_ kto =>
+_ reg REG_OP
+line 47
+_ cmd cpu_exec
+line 49
+_ cmd copy
+_ reg REG_RES
+_ kto =>
+_ var actual
+line 50
+_ cmd write
+_ str -5
+_ kto =>
+_ var expected
+line 52
+_ cmd copy
+_ reg PROGRAM_COUNTER
+_ kto =>
+_ var nextTestAddress
+line 53
+_ cmd jump
+_ lbl check
+line 56
+_ cmd write
+_ str 6.5 - 2.4 = 4.1
+_ kto =>
+_ var testName
+line 57
+_ cmd write
+_ str 6.5
+_ kto =>
+_ reg REG_A
+line 58
+_ cmd write
+_ str 2.4
+_ kto =>
+_ reg REG_B
+line 59
+_ cmd write
+_ opr OP_SUB
+_ kto =>
+_ reg REG_OP
+line 60
+_ cmd cpu_exec
+line 62
+_ cmd copy
+_ reg REG_RES
+_ kto =>
+_ var actual
+line 63
+_ cmd write
+_ str 4.1
+_ kto =>
+_ var expected
+line 65
+_ cmd copy
+_ reg PROGRAM_COUNTER
+_ kto =>
+_ var nextTestAddress
+line 66
+_ cmd jump
+_ lbl check
+line 69
+_ cmd write
+_ str -2 - -2 = 0
+_ kto =>
+_ var testName
+line 70
+_ cmd write
+_ str -2
+_ kto =>
+_ reg REG_A
+line 71
+_ cmd write
+_ str -2
+_ kto =>
+_ reg REG_B
+line 72
+_ cmd write
+_ opr OP_SUB
+_ kto =>
+_ reg REG_OP
+line 73
+_ cmd cpu_exec
+line 75
+_ cmd copy
+_ reg REG_RES
+_ kto =>
+_ var actual
+line 76
+_ cmd write
+_ str 0
+_ kto =>
+_ var expected
+line 78
+_ cmd copy
+_ reg PROGRAM_COUNTER
+_ kto =>
+_ var nextTestAddress
+line 79
+_ cmd jump
+_ lbl check
+line 82
+_ cmd write
+_ str -3 - 3 = -6
+_ kto =>
+_ var testName
+line 83
+_ cmd write
+_ str -3
+_ kto =>
+_ reg REG_A
+line 84
+_ cmd write
+_ str 3
+_ kto =>
+_ reg REG_B
+line 85
+_ cmd write
+_ opr OP_SUB
+_ kto =>
+_ reg REG_OP
+line 86
+_ cmd cpu_exec
+line 88
+_ cmd copy
+_ reg REG_RES
+_ kto =>
+_ var actual
+line 89
+_ cmd write
+_ str -6
+_ kto =>
+_ var expected
+line 91
+_ cmd copy
+_ reg PROGRAM_COUNTER
+_ kto =>
+_ var nextTestAddress
+line 92
+_ cmd jump
+_ lbl check
+line 95
+_ cmd write
+_ str 10.5 - 7.3 = 3.2
+_ kto =>
+_ var testName
+line 96
+_ cmd write
+_ str 10.5
+_ kto =>
+_ reg REG_A
+line 97
+_ cmd write
+_ str 7.3
+_ kto =>
+_ reg REG_B
+line 98
+_ cmd write
+_ opr OP_SUB
+_ kto =>
+_ reg REG_OP
+line 99
+_ cmd cpu_exec
+line 101
+_ cmd copy
+_ reg REG_RES
+_ kto =>
+_ var actual
+line 102
+_ cmd write
+_ str 3.2
+_ kto =>
+_ var expected
+line 104
+_ cmd copy
+_ reg PROGRAM_COUNTER
+_ kto =>
+_ var nextTestAddress
+line 105
+_ cmd jump
+_ lbl check
+line 108
+_ cmd write
+_ str -1.1 - 0.9 = -1.9
+_ kto =>
+_ var testName
+line 109
+_ cmd write
+_ str -1.1
+_ kto =>
+_ reg REG_A
+line 110
+_ cmd write
+_ str 0.8
+_ kto =>
+_ reg REG_B
+line 111
+_ cmd write
+_ opr OP_SUB
+_ kto =>
+_ reg REG_OP
+line 112
+_ cmd cpu_exec
+line 114
+_ cmd copy
+_ reg REG_RES
+_ kto =>
+_ var actual
+line 115
+_ cmd write
+_ str -1.9
+_ kto =>
+_ var expected
+line 117
+_ cmd copy
+_ reg PROGRAM_COUNTER
+_ kto =>
+_ var nextTestAddress
+line 118
+_ cmd jump
+_ lbl check
+line 121
+_ cmd write
+_ str 2.999 - 2.0 = 0.999
+_ kto =>
+_ var testName
+line 122
+_ cmd write
+_ str 2.999
+_ kto =>
+_ reg REG_A
+line 123
+_ cmd write
+_ str 2.0
+_ kto =>
+_ reg REG_B
+line 124
+_ cmd write
+_ opr OP_SUB
+_ kto =>
+_ reg REG_OP
+line 125
+_ cmd cpu_exec
+line 127
+_ cmd copy
+_ reg REG_RES
+_ kto =>
+_ var actual
+line 128
+_ cmd write
+_ str 0.999
+_ kto =>
+_ var expected
+line 130
+_ cmd copy
+_ reg PROGRAM_COUNTER
+_ kto =>
+_ var nextTestAddress
+line 131
+_ cmd jump
+_ lbl check
+line 134
+_ cmd jump
+_ lbl exit

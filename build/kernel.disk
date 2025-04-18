@@ -1,0 +1,291 @@
+OP_DECR
+OP_INCR
+/
+0
+2
+mount.info
+OP_READ_BLOCK
+1
+ 
+OP_GET_COLUMN
+MOUNT
+OP_CMP_NEQ
+
+OP_CMP_EQ
+3
+4
+5
+END_PARTITION_TABLE
+NAME
+OP_GET_LENGTH
+OP_CONCAT_WITH
+Partition 
+COLOR_CYAN
+OP_DISPLAY
+ from 
+ mounted as 
+OP_DISPLAY_LN
+OP_ADD
+FS_HEADER
+OP_IS_NUM
+OP_CMP_LE
+FS_HEADER_END
+OP_SUB
+Fail to open file
+Fail to open file: No free descriptors
+OP_CMP_LT
+Incorrect file descriptor for sys_fs_descriptor_info
+Incorrect file descriptor for sys_fs_close
+Failed to read data from the file
+OP_WRITE_BLOCK
+Failed to write data to the file
+OP_STARTS_WITH
+No mount point found for the file path
+8
+Error calculating the size
+Error during conversion from line to block
+Unknown system call!!!
+COLOR_RED
+38
+Function not implemented
+OP_SYS_RETURN
+OP_REPLACE_COLUMN
+OP_READ_INPUT
+OP_SET_BACKGROUND_COLOR
+OP_RENDER_BITMAP
+OP_NOP
+label:sys_call_handler
+19
+label:sys_call_exit
+label:sys_call_println
+label:sys_call_print
+label:sys_call_read_input
+label:sys_call_fs_open
+label:sys_call_fs_descriptor_info
+label:sys_call_fs_close
+label:sys_call_fs_read
+label:sys_call_fs_write
+label:sys_call_set_background
+label:sys_call_render_bitmap
+label:sys_call_sleep
+label:sys_call_get_file_attr
+label:sys_call_set_file_attr
+label:sys_call_sched_program
+label:sys_call_is_active_pid
+label:sys_call_kill_process
+label:sys_call_skip_sched
+label:sys_call_wait_sched
+6
+10
+12
+14
+16
+0 0 1
+ready
+No process to schedule
+pause
+Max process count is reached. Failed to load new process
+Can't allocate RAM for the process
+17
+Program is too big to load the program. Change proc_memory in /config.txt and restart the system.
+PID
+|
+STATE ready
+PRIORITY
+MEM_START
+MEM_END
+PC
+FD_LIST
+FREE
+Failed to execute command
+  
+OP_CONTAINS
+No active process with provided PID found
+Something wrong happened. No way to pause the process.
+Not found process with pause state
+Process can not use kill PID for its own PID
+250
+50
+/config.txt
+proc_memory
+max_proc_count
+max_fd_count
+schedule_quantum
+KERNEL PANIC!
+OP_HALT
+Operation register:
+A register:
+B register:
+C register:
+D register:
+Result register:
+Comparison result register:
+Error register:
+Display buffer:
+Display color:
+Keyboard buffer:
+Display background:
+Program counter:
+Free memory start:
+Free memory end:
+Free chunks:
+label:sys_interrupt_handler
+-1
+RAMFS init - done.
+COLOR_GREEN
+Welcome to KaguOS
+exit
+sched
+ :) 
+KEYBOARD_READ_LINE
+sched -- 
+sched run
+Successfully loaded: 
+List of scheduled processes:
+COLOR_NO
+Incorrect parameters for sched:
+Load program:          sched -- cmd arg1 arg2 arg3
+Run loaded tasks:      sched run
+100
+Good bye!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
