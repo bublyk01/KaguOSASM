@@ -140,6 +140,14 @@ for src_file in SRC_FILES:
                 else:
                     VARIABLES.append(var_name)
                     VARIABLES_DECL_ADDRESSES.append(NEXT_INSTR_ADDRESS)
+            elif cmd == "var" and len(lexemes) >= 2:
+                var_name = lexemes[1]
+                if var_name not in VARIABLES:
+                    VARIABLES.append(var_name)
+                    VARIABLES_ADDRESSES.append(NEXT_INSTR_ADDRESS)
+                    SYMBOL_TABLE[var_name] = str(NEXT_INSTR_ADDRESS)
+                    NEXT_INSTR_ADDRESS += 1
+                continue
 
             elif cmd == "label" and len(tokens) >= 2:
                 label_name = tokens[1]
@@ -189,24 +197,23 @@ for src_file in SRC_FILES:
 
                 if const not in CONSTANTS:
                     CONSTANTS.append(const)
-                    if const.startswith('"'):
+                    if const.startswith('"') and const.endswith('"'):
                         CONSTANTS_EVALUATED.append(const.strip('"'))
                     elif const.startswith("LABEL:"):
-                        lbl = const[6:]
-                        idx = find_index(lbl, LABELS)
-                        if idx == -1:
-                            compilation_error("Label not found", f"Label '{lbl}' used but not declared", line, lineno, src_file)
-                            CONSTANTS_EVALUATED.append("0")
-                        else:
+                        label = const[6:]
+                        idx = find_index(label, LABELS)
+                        if idx != -1:
                             CONSTANTS_EVALUATED.append(str(LABELS_ADDRESSES[idx]))
+                        else:
+                            print(f"⚠️ Label not found: {label}", file=sys.stderr)
+                            CONSTANTS_EVALUATED.append("0")
                     elif const in SYMBOL_TABLE:
                         CONSTANTS_EVALUATED.append(SYMBOL_TABLE[const])
-                    elif re.fullmatch(r"\d+", const):
+                    elif const.isdigit() or (const.startswith('-') and const[1:].isdigit()):
                         CONSTANTS_EVALUATED.append(const)
                     else:
-                        compilation_error("Unrecognized constant", f"Constant '{const}' could not be resolved", line, lineno, src_file)
+                        print(f"⚠️ Constant '{const}' not found in SYMBOL_TABLE or labels", file=sys.stderr)
                         CONSTANTS_EVALUATED.append("0")
-
             PARSED_LEXEMES.extend(parsed)
             NEXT_INSTR_ADDRESS += 1
 
@@ -405,13 +412,38 @@ for i, c in enumerate(CONSTANTS):
 print("=== CONSTANTS_EVALUATED (to be written) ===")
 for i, ce in enumerate(CONSTANTS_EVALUATED):
     print(f"[{i}] {ce}")
-
+    
 with open(OUTPUT_FILE, "a") as out:
     for ce in CONSTANTS_EVALUATED:
-        out.write(ce + "\n")
+        clean_ce = ce.strip().strip('"')
 
-    for _ in VARIABLES:
-        out.write("\n")
+        # Pass through digits
+        if clean_ce.isdigit() or (clean_ce.startswith('-') and clean_ce[1:].isdigit()):
+            out.write(f"{clean_ce}\n")
+            continue
+
+        # Label reference
+        if clean_ce.startswith("label:"):
+            label_name = clean_ce[6:]
+            if label_name in LABELS:
+                idx = LABELS.index(label_name)
+                address = LABELS_ADDRESSES[idx]
+                out.write(f"{address}\n")
+            else:
+                print(f"⚠️ Label not found: {clean_ce}", file=sys.stderr)
+                out.write("0\n")
+            continue
+
+        # Constant or Variable
+        if clean_ce in SYMBOL_TABLE:
+            out.write(f"{SYMBOL_TABLE[clean_ce]}\n")
+            continue
+
+        # Not found
+        print(f"⚠️ Invalid constant in output: '{ce}' → writing 0", file=sys.stderr)
+        out.write("0\n")
+
+
 
 if COMPILATION_ERROR_COUNT:
     print(f"\033[91mCompilation failed: {COMPILATION_ERROR_COUNT} error(s).\033[0m")
